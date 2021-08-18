@@ -1,11 +1,33 @@
-- name: "Update dependecies"
-  shell: apt-get update
+---
+- name: "update apt packages."
+  become: yes
+  apt:
+    update_cache: yes
 
-- name: "Install Nodejs"
-  shell: apt install nodejs
+- name: "upgrade packages"
+  become: yes
+  apt:
+    upgrade: "yes"
 
-- name: "Install pm2"
-  shell: npm install pm2 -g
+- name: remove dependencies that are no longer required
+  become: yes
+  apt:
+    autoremove: yes
+
+- name: "install dependencies."
+  become: yes
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
+
+- name: "install pm2"
+  become: yes
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
 
 - name: "Set environment variables"
   environment:
