@@ -187,7 +187,7 @@ jobs:
               && pip3 install awscli
       - run:
           name: Show Inventory file
-          command: cat ~/project/.circleci/ansible/inventory
+          command: cat ~/project/.circleci/ansible/inventory.txt
       - run:
           name: Configure server
           command: |
