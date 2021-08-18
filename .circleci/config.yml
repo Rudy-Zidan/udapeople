@@ -12,10 +12,10 @@ commands:
           when: on_fail
           command: |
             aws cloudformation delete-stack \
-            --stack-name udapeople-backend-${workflow_id}
+            --stack-name "udapeople-backend-<<parameters.workflow_id>>"
 
             aws cloudformation delete-stack \
-            --stack-name udapeople-frontend-${workflow_id}
+            --stack-name "udapeople-frontend-<<parameters.workflow_id>>"
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -147,13 +147,12 @@ jobs:
       - run:
           name: Add back-end url to memstash
           command: |
-            backend_url=$(aws ec2 describe-instances \ 
+            curl -H "Content-Type: text/plain" -H "token: ${MEMSTASH_TOKEN}" \
+            --request PUT --data "$(aws ec2 describe-instances \ 
             --query 'Reservations[*].Instances[*].PublicDnsName' \
             --filters "Name=tag:project,Values=udapeople" \
-            --output text)
-
-            curl -H "Content-Type: text/plain" -H "token: ${MEMSTASH_TOKEN}" \
-            --request PUT --data "$backend_url" https://api.memstash.io/values/backend_url
+            --output text)" \
+            https://api.memstash.io/values/backend_url
       - run:
           name: Add back-end ip to ansible inventory
           command: |
