@@ -183,9 +183,6 @@ jobs:
           command: |
             apk add --update ansible
       - run:
-          name: Show Inventory file
-          command: cat .circleci/ansible/inventory.txt
-      - run:
           name: Configure server
           command: |
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
