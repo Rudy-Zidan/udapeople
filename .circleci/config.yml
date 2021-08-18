@@ -182,7 +182,7 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update ansible \
-            pip3 install --user --upgrade awscli
+            pip3 install awscli
       - run:
           name: Configure server
           command: |
