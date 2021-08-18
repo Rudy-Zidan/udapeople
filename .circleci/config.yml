@@ -246,12 +246,17 @@ jobs:
           command: |
             BACKEND_URL=$(curl -H "token: ${MEMSTASH_TOKEN}" --request GET https://api.memstash.io/values/backend_url)
             export API_URL="http://${BACKEND_URL}:3030"
+
+            echo ENVIRONMENT=production > "frontend/.env"
+            echo NODE_ENV=production >> "frontend/.env"
+            echo API_URL=$API_URL >> "frontend/.env"
+
             echo "${API_URL}"
       - run:
           name: Deploy frontend objects
           command: |
-            echo "${API_URL}"
             cd frontend
+            cat .env
             npm run build
 
             aws s3 cp --recursive dist "s3://udapeople-73b06f6"
