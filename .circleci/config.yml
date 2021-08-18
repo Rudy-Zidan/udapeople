@@ -160,13 +160,11 @@ jobs:
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=udapeople" \
-              --output text >> .circleci/ansible/inventory.ini
-
-              cat .circleci/ansible/inventory.ini
+              --output text >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/.circleci/ansible/inventory.ini
+            - project/.circleci/ansible/inventory.txt
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -183,17 +181,19 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible \
-              py3-pip \
-              && pip3 install --upgrade pip \
-              && pip3 install awscli
+            apk add --update ansible
       - run:
           name: Show Inventory file
-          command: cat ~/project/.circleci/ansible/inventory.ini
+          command: cat .circleci/ansible/inventory.txt
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i ~/project/.circleci/ansible/inventory.ini .circleci/ansible/configure-server.yml
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+      - run:
+          name: Install awscli for rollback
+          when: on_fail
+          command: |
+            apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
