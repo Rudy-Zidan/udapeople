@@ -1,0 +1,19 @@
+- name: "Update dependecies"
+  shell: apt-get update
+
+- name: "Install Nodejs"
+  shell: apt install nodejs
+
+- name: "Install pm2"
+  shell: npm install pm2 -g
+
+- name: "Set environment variables"
+  environment:
+    ENVIRONMENT: production
+    TYPEORM_CONNECTION: postgres
+    TYPEORM_ENTITIES: ./src/modules/domain/**/*.entity.ts
+    TYPEORM_HOST: udapeople-prod.csa35jyq46m0.us-east-1.rds.amazonaws.com
+    TYPEORM_PORT: 5432
+    TYPEORM_USERNAME: postgres
+    TYPEORM_PASSWORD: udapeople123
+    TYPEORM_DATABASE: udapeople

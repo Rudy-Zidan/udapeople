@@ -172,20 +172,18 @@ jobs:
     docker:
       - image: ansible/ansible
     steps:
-      # Checkout code from git
-      # Add ssh keys with fingerprint
-      # attach workspace
-      - run:
-          name: Install dependencies
-          command: |
-            # Your code here
-            exit 1
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "8d:54:2b:44:2f:93:c5:27:7c:d1:13:5f:a9:f2:6f:84"
+      - attach_workspace:
+          at: ~/
       - run:
           name: Configure server
           command: |
-            # Your code here
-            exit 1
-      # Here's where you will add some code to rollback on failure      
+            ansible-playbook -i inventory .circleci/ansible/configure-server.yml
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   run-migrations:
     docker:
