@@ -187,11 +187,11 @@ jobs:
               && pip3 install awscli
       - run:
           name: Show Inventory file
-          command: cat ~/inventory.txt
+          command: cat ~/project/.circleci/ansible/inventory.txt
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i ~/inventory.txt .circleci/ansible/configure-server.yml
+            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
