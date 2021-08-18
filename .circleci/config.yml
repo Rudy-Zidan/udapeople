@@ -212,7 +212,7 @@ jobs:
           command: |
             cd backend
 
-            if grep -q "has been executed successfully" <<< $(npm run migrations); then
+            if grep -q "has been executed successfully" \<<< $(npm run migrations); then
               exit 0
             else
               exit 1
@@ -223,7 +223,7 @@ jobs:
             curl -H "Content-Type: text/plain" -H "token: ${MEMSTASH_TOKEN}" \
               --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
 
-      # - revert-migrations:
+      # - revert-migrations:s
       #     workflow_id: ${CIRCLE_WORKFLOW_ID}
       - install_awscli
       - destroy-environment:
