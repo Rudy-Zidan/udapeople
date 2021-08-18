@@ -35,16 +35,7 @@ commands:
               npm install
               npm run migrations:revert
             fi
-
-  install_awscli:
-    description: Provide a reusable command in case we need to rollback from a non amazon/aws-cli docker image
-    steps:
-      - run:
-          name: Install awscli for rollback
-          when: on_fail
-          command: |
-            apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
-            
+    
 jobs:
   build-frontend:
     docker:
@@ -195,8 +186,11 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
-
-      - install_awscli
+      - run:
+          name: Install awscli for rollback
+          when: on_fail
+          command: |
+            apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -211,8 +205,10 @@ jobs:
           name: Run migrations
           command: |
             cd backend
+            output=$(npm run migrations)
+            echo $output
 
-            if grep -q "has been executed successfully" \<<< $(npm run migrations); then
+            if grep -q "has been executed successfully" \<<< $output; then
               exit 0
             else
               exit 1
@@ -225,7 +221,11 @@ jobs:
 
       # - revert-migrations:s
       #     workflow_id: ${CIRCLE_WORKFLOW_ID}
-      - install_awscli
+      - run:
+          name: Install awscli for rollback
+          when: on_fail
+          command: |
+            apt-get install python python-pip && pip install awscli
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}   
 
