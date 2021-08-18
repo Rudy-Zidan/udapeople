@@ -160,11 +160,13 @@ jobs:
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=udapeople" \
-              --output text >> .circleci/ansible/inventory
+              --output text >> .circleci/ansible/inventory.ini
+
+              cat .circleci/ansible/inventory.ini
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/.circleci/ansible/inventory
+            - project/.circleci/ansible/inventory.ini
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -187,11 +189,11 @@ jobs:
               && pip3 install awscli
       - run:
           name: Show Inventory file
-          command: cat ~/project/.circleci/ansible/inventory
+          command: cat ~/project/.circleci/ansible/inventory.ini
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i ~/project/.circleci/ansible/inventory .circleci/ansible/configure-server.yml
+            ansible-playbook -i ~/project/.circleci/ansible/inventory.ini .circleci/ansible/configure-server.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
