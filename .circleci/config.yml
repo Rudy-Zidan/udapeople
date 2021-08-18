@@ -231,22 +231,32 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            sudo yum install -y gcc-c++ make
+            curl -sL https://rpm.nodesource.com/setup_13.x | sudo -E bash -
+            sudo yum install -y nodejs
+
+            cd frontend
+            npm i
       - run:
           name: Get backend url
           command: |
-            # your code here
-            export API_URL="http://${BACKEND_IP}:3030"
+            BACKEND_URL=$(curl -H "token: ${MEMSTASH_TOKEN}" --request GET https://api.memstash.io/values/backend_url)
+            export API_URL="http://${BACKEND_URL}:3030"
             echo "${API_URL}"
       - run:
           name: Deploy frontend objects
           command: |
-            # your code here
-      # Here's where you will add some code to rollback on failure      
+            cd frontend
+            npm run build
+
+            aws s3 cp --recursive dist "s3://udapeople-73b06f6"
+      # Here's where you will add some code to rollback on failure
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
                     
   deploy-backend:
     docker:
