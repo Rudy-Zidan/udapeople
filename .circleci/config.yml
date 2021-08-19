@@ -79,6 +79,9 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+      - save_cache:
+          paths: [backend/dist]
+          key: backend-dist
 
   test-frontend:
     docker:
@@ -278,11 +281,11 @@ jobs:
       - attach_workspace:
           at: ~/
       - restore_cache:
-          keys: [backend-build]
+          keys: [backend-dist]
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible curl
+            apk add --update ansible curl nodejs=13.8.0 npm
       - run:
           name: Deploy backend
           command: |
