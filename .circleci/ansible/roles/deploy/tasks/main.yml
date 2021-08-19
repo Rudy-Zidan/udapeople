@@ -3,7 +3,7 @@
 - name: Copy ./dist
   become: true
   copy:
-    src: ~/project/backend/dist
+    src: ./project/backend/dist
     dest: ~/
 
 - name: Start backend
