@@ -3,9 +3,9 @@
 - name: Copy ./dist
   become: true
   copy:
-    src: ./dist
-    dest: /var/app
+    src: backend/dist
+    dest: ~/
 
 - name: Start backend
   become: true
-  command: pm2 start /var/app/dist/main.js --name backend
+  command: pm2 start ~/dist/main.js --name backend

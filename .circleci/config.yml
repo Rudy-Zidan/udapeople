@@ -221,9 +221,6 @@ jobs:
           command: |
             curl -H "Content-Type: text/plain" -H "token: ${MEMSTASH_TOKEN}" \
               --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
-
-      - revert-migrations:
-          workflow_id: ${CIRCLE_WORKFLOW_ID}
       - run:
           name: Install awscli
           when: on_fail
