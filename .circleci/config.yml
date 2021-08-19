@@ -285,7 +285,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible curl nodejs=13.8.0 npm
+            apk add --update ansible curl nodejs npm
       - run:
           name: Deploy backend
           command: |
