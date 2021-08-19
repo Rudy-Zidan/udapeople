@@ -35,6 +35,15 @@ commands:
               npm install
               npm run migrations:revert
             fi
+
+  install_awscli_for_alpine:
+    steps:
+      - run:
+          name: Install awscli
+          when: on_fail
+          command: |
+            apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
+          
     
 jobs:
   build-frontend:
@@ -186,11 +195,7 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
-      - run:
-          name: Install awscli for rollback
-          when: on_fail
-          command: |
-            apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
+      - install_awscli_for_alpine
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -217,10 +222,10 @@ jobs:
             curl -H "Content-Type: text/plain" -H "token: ${MEMSTASH_TOKEN}" \
               --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
 
-      # - revert-migrations:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID}
       - run:
-          name: Install awscli for rollback
+          name: Install awscli
           when: on_fail
           command: |
             sudo apt-get install python python-pip && pip install awscli
@@ -260,26 +265,36 @@ jobs:
             npm run build
 
             aws s3 cp --recursive dist "s3://udapeople-73b06f6"
-      # Here's where you will add some code to rollback on failure
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID}
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
                     
   deploy-backend:
     docker:
-      - image: ansible/ansible
+      - image: python:3.8-alpine3.13
     steps:
-      # Checkout code from git
-      # Add ssh keys with fingerprint
-      # attach workspace
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "8d:54:2b:44:2f:93:c5:27:7c:d1:13:5f:a9:f2:6f:84"
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            apk add --update ansible
       - run:
           name: Deploy backend
           command: |
-            # your code here
-      # Here's where you will add some code to rollback on failure  
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID}
+      - install_awscli_for_alpine
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7} 
 
   smoke-test:
     docker:
