@@ -287,16 +287,11 @@ jobs:
           command: |
             sudo apt-get install python ansible python-pip && pip install awscli
       - run:
-          name: Verify dist existence
-          command: |
-            cd backend
-            ls ~/project/backend
-      - run:
           name: Deploy backend
           command: |
             mkdir -p .circleci/ansible/roles/deploy/files
             cp -r ~/project/backend/dist .circleci/ansible/roles/deploy/files
-            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
+            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID}
       - destroy-environment:
