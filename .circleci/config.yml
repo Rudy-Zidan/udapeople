@@ -264,11 +264,11 @@ jobs:
             cat .env
             npm run build
 
-            aws s3 cp --recursive dist "s3://udapeople-73b06f6"
-      - revert-migrations:
-          workflow_id: ${CIRCLE_WORKFLOW_ID}
+            aws s3 cp --recursive dist "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID}
                     
   deploy-backend:
     docker:
@@ -287,10 +287,6 @@ jobs:
           command: |
             sudo apt-get install zip unzip python ansible python-pip && pip install awscli
       - run:
-          name: Log env variables
-          command: |
-            printenv
-      - run:
           name: Deploy backend
           command: |
             mkdir -p .circleci/ansible/roles/deploy/files
@@ -303,33 +299,52 @@ jobs:
 
             cd ~/project
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID}
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7} 
 
   smoke-test:
     docker:
       - image: alpine
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            apk add --update curl nodejs npm
       - run:
           name: Get backend url
           command: |
-            # your code here
+            BACKEND_URL=$(curl -H "token: ${MEMSTASH_TOKEN}" --request GET https://api.memstash.io/values/backend_url)
+            echo $BACKEND_URL > "backend/backend_url.txt"
       - run:
           name: Backend smoke test.
           command: |
-            # your code here
+            BACKEND_URL=$(cat backend/backend_url.txt)
+            SUCCESS=$(curl --request GET $BACKEND_URL)
+
+            if grep -q "ok" \<<< $SUCCESS; then
+              exit 0
+            else
+              exit 1
+            fi
       - run:
           name: Frontend smoke test.
           command: |
-            # your code here
-      # Here's where you will add some code to rollback on failure  
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com"
+
+            if curl -s ${URL} | grep "Welcome"
+            then
+              exit 0
+            else
+              exit 1
+            fi
+      - install_awscli_for_alpine
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID}
 
   cloudfront-update:
     docker:
