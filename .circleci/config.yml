@@ -290,12 +290,12 @@ jobs:
           name: Verify dist existence
           command: |
             cd backend
-            ls -a
+            ls ~/project/backend/dist
       - run:
           name: Deploy backend
           command: |
             mkdir -p .circleci/ansible/roles/deploy/files
-            cp -r backend/dist .circleci/ansible/roles/deploy/files
+            cp -r ~/project/backend/dist .circleci/ansible/roles/deploy/files
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID}
