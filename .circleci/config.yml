@@ -298,6 +298,7 @@ jobs:
             mv dist.zip ~/project/.circleci/ansible/roles/deploy/files
 
             cd ~/project
+            printenv
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -322,7 +323,7 @@ jobs:
           name: Backend smoke test.
           command: |
             BACKEND_URL=$(cat backend/backend_url.txt)
-            SUCCESS=$(curl --request GET $BACKEND_URL)
+            SUCCESS=$(curl --request GET "http://${BACKEND_URL}:3030/api/status")
 
             if grep -q "ok" \<<< $SUCCESS; then
               exit 0
@@ -336,10 +337,11 @@ jobs:
 
             if curl -s ${URL} | grep "Welcome"
             then
-              exit 0
+              return 1
             else
-              exit 1
+              return 0
             fi
+
       - install_awscli_for_alpine
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
