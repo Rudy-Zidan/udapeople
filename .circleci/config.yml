@@ -23,6 +23,8 @@ commands:
       workflow_id:
         type: string
     steps:
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Revert migrations
           when: on_fail
@@ -32,7 +34,6 @@ commands:
             if [[ $SUCCESS == 1 ]]
             then
               cd backend
-              npm install
               npm run migrations:revert
             fi
 
@@ -194,6 +195,11 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update ansible
+      - run:
+          name: Verify dist existence
+          command: |
+            cd backend
+            ls
       - run:
           name: Configure server
           command: |
