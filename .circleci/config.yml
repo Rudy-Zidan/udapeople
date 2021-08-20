@@ -324,9 +324,10 @@ jobs:
           name: Backend smoke test.
           command: |
             BACKEND_URL=$(cat backend/backend_url.txt)
-            SUCCESS=$(curl -s "http://${BACKEND_URL}:3030/api/status")
+            echo $BACKEND_URL
 
-            if grep -q "ok" \<<< $SUCCESS; then
+            if curl -s ${BACKEND_URL} | grep "ok"
+            then
               exit 0
             else
               exit 1
