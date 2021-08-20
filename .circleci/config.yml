@@ -287,6 +287,10 @@ jobs:
           command: |
             sudo apt-get install zip unzip python ansible python-pip && pip install awscli
       - run:
+          name: Log env variables
+          command: |
+            printenv
+      - run:
           name: Deploy backend
           command: |
             mkdir -p .circleci/ansible/roles/deploy/files
@@ -298,7 +302,6 @@ jobs:
             mv dist.zip ~/project/.circleci/ansible/roles/deploy/files
 
             cd ~/project
-            echo $TYPEORM_HOST
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID}
