@@ -6,6 +6,12 @@
     src: dist
     dest: /home/ubuntu
 
+- name: Install dependencies
+  become: true
+  shell: |
+    cd ~/dist
+    npm i
+
 - name: Start backend
   become: true
-  command: pm2 start /home/ubuntu/dist/main.js --name backend
+  command: pm2 start ~/dist/main.js --name backend
