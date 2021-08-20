@@ -292,6 +292,7 @@ jobs:
             mkdir -p .circleci/ansible/roles/deploy/files
             cp -r ~/project/backend/dist .circleci/ansible/roles/deploy/files
             cp ~/project/backend/package.json .circleci/ansible/roles/deploy/files/dist
+            cp ~/project/backend/package-lock.json .circleci/ansible/roles/deploy/files/dist
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID}
