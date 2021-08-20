@@ -23,8 +23,6 @@ commands:
       workflow_id:
         type: string
     steps:
-      - restore_cache:
-          keys: [backend-build]
       - run:
           name: Revert migrations
           when: on_fail
@@ -34,6 +32,7 @@ commands:
             if [[ $SUCCESS == 1 ]]
             then
               cd backend
+              npm i
               npm run migrations:revert
             fi
 
@@ -78,8 +77,11 @@ jobs:
             npm i
             npm run build
       - save_cache:
-          paths: [backend/node_modules, backend/dist]
+          paths: [backend/node_modules]
           key: backend-build
+      - save_cache:
+          paths: [backend/dist]
+          key: backend-dist
 
   test-frontend:
     docker:
@@ -279,7 +281,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - restore_cache:
-          keys: [backend-build]
+          keys: [backend-dist]
       - run:
           name: Install dependencies
           command: |
@@ -288,10 +290,12 @@ jobs:
           name: Verify dist existence
           command: |
             cd backend
-            ls
+            ls -a
       - run:
           name: Deploy backend
           command: |
+            mkdir -p .circleci/ansible/roles/deploy/files
+            cp -r backend/dist .circleci/ansible/roles/deploy/files
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID}
