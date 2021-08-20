@@ -272,7 +272,7 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: python:3.8-alpine3.13
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - add_ssh_keys:
@@ -285,12 +285,12 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible curl nodejs npm
+            sudo apt-get install python ansible python-pip && pip install awscli
       - run:
           name: Verify dist existence
           command: |
             cd backend
-            ls ~/project/backend/dist
+            ls ~/project/backend
       - run:
           name: Deploy backend
           command: |
@@ -299,7 +299,6 @@ jobs:
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID}
-      - install_awscli_for_alpine
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7} 
 
