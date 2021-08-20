@@ -78,11 +78,8 @@ jobs:
             npm i
             npm run build
       - save_cache:
-          paths: [backend/node_modules]
+          paths: [backend/node_modules, backend/dist]
           key: backend-build
-      - save_cache:
-          paths: [backend/dist]
-          key: backend-dist
 
   test-frontend:
     docker:
@@ -196,11 +193,6 @@ jobs:
           command: |
             apk add --update ansible
       - run:
-          name: Verify dist existence
-          command: |
-            cd backend
-            ls
-      - run:
           name: Configure server
           command: |
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
@@ -287,11 +279,16 @@ jobs:
       - attach_workspace:
           at: ~/
       - restore_cache:
-          keys: [backend-dist]
+          keys: [backend-build]
       - run:
           name: Install dependencies
           command: |
             apk add --update ansible curl nodejs npm
+      - run:
+          name: Verify dist existence
+          command: |
+            cd backend
+            ls
       - run:
           name: Deploy backend
           command: |

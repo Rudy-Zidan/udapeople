@@ -3,9 +3,9 @@
 - name: Copy ./dist
   become: true
   copy:
-    src: ./root/project/backend/dist
-    dest: ~/
+    src: /root/project/backend/dist
+    dest: /home/ubuntu
 
 - name: Start backend
   become: true
-  command: pm2 start ~/dist/main.js --name backend
+  command: pm2 start /home/ubuntu/dist/main.js --name backend
