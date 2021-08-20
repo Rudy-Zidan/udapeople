@@ -290,6 +290,7 @@ jobs:
             mkdir -p .circleci/ansible/roles/deploy/files
 
             cd backend
+            echo TYPEORM_ENTITIES=~/app/modules/domain/**/*.entity.js > ".env"
             npm i
             npm run build
 
