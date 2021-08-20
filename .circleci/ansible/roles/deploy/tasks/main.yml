@@ -4,14 +4,14 @@
   become: true
   copy:
     src: dist
-    dest: /home/ubuntu
+    dest: ~/app
 
 - name: Install dependencies
   become: true
   shell: |
-    cd ~/dist
+    cd ~/app
     npm i
 
 - name: Start backend
   become: true
-  command: pm2 start ~/dist/main.js --name backend
+  command: pm2 start ~/app/main.js --name backend
