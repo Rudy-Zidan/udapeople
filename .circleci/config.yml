@@ -296,6 +296,8 @@ jobs:
             zip -rq dist.zip *
 
             mv dist.zip ~/project/.circleci/ansible/roles/deploy/files
+
+            cd ~/project
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID}
