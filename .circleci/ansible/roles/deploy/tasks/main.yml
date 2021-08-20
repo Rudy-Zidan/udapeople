@@ -6,17 +6,16 @@
     state: directory
 
 - name: Upload dist to app directory
-  become: true
   copy:
-    src: dist
-    dest: ~/app
+    src: files/dist.zip
+    dest: "~/app"
 
 - name: Install dependencies
-  become: true
   shell: |
-    cd ~/app/dist
+    cd ~/app
+    unzip dist.zip
+    rm -rf dist.zip
     npm i
 
 - name: Start backend
-  become: true
-  command: pm2 start ~/app/dist/main.js --name backend
+  command: pm2 start ~/app/main.js --name backend -f

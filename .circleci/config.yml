@@ -285,14 +285,17 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt-get install python ansible python-pip && pip install awscli
+            sudo apt-get install zip unzip python ansible python-pip && pip install awscli
       - run:
           name: Deploy backend
           command: |
             mkdir -p .circleci/ansible/roles/deploy/files
-            cp -r ~/project/backend/dist .circleci/ansible/roles/deploy/files
-            cp ~/project/backend/package.json .circleci/ansible/roles/deploy/files/dist
-            cp ~/project/backend/package-lock.json .circleci/ansible/roles/deploy/files/dist
+
+            cp ~/project/backend/package.json ~/project/backend/dist
+            cd ~/project/backend/dist
+            zip -rq dist.zip *
+
+            mv dist.zip ~/project/.circleci/ansible/roles/deploy/files
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID}
